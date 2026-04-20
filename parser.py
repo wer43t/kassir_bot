@@ -116,21 +116,6 @@ def _parse_sessions(soup: BeautifulSoup, base_url: str) -> list[SessionInfo]:
                         time_str="",
                         url=make_url(eid),
                     )
-    else:
-        for a in soup.find_all("a", href=True):
-            href = a["href"]
-            eid = _extract_fragment_id(href)
-            if not eid or eid in sessions:
-                continue
-            text = re.sub(r"\s+", " ", a.get_text(" ", strip=True))
-            text = re.sub(r"(?i)\s*купить\s*", "", text).strip()
-            sessions[eid] = SessionInfo(
-                event_id=eid,
-                date_str=text[:40] or f"#{eid}",
-                time_str="",
-                url=make_url(eid),
-            )
-
     # для страниц с одной датой табов нет - event_id в canonical
     if not sessions:
         canonical_tag = soup.find("link", rel="canonical")
