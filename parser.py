@@ -200,15 +200,21 @@ async def fetch_order_kit(event_id: int) -> TicketAvailability:
 
     total = sum(q.get("ticketsCount", 0) for q in data.get("quotas", []))
 
-    sector_ids = {
-        q["sectorId"]
-        for q in data.get("quotas", [])
-        if q.get("ticketsCount", 0) > 0
-    }
+    available_quotas = [q for q in data.get("quotas", []) if q.get("ticketsCount", 0) > 0]
+
+    sector_ids = {q["sectorId"] for q in available_quotas}
     sectors = [s["name"] for s in data.get("sectors", []) if s["id"] in sector_ids]
+
+    available_tg_ids = {
+        int(tg_id)
+        for q in available_quotas
+        for tg_id in q.get("tariffGroupIds", [])
+    }
 
     min_price: Optional[float] = None
     for tg in data.get("tariffGroups", []):
+        if tg.get("id") not in available_tg_ids:
+            continue
         for t in tg.get("tariffs", []):
             p = t.get("price")
             if p is not None and (min_price is None or p < min_price):
