@@ -1,0 +1,13 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-15}
+      - DB_PATH=/data/kassir_bot.db
+    volumes:
+      - bot_data:/data
+
+volumes:
+  bot_data:
